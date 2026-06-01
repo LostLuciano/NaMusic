@@ -23,26 +23,6 @@ public class CoreMLStemSeparatorWrapper {
         onProgress: @escaping (String, Double) -> Void
     ) async throws -> [String: URL] {
         
-        // Request processing gate
-        let canStart = processingGate.requestOperation(.separation)
-        
-        if !canStart {
-            // Wait for gate to be available
-            let available = await processingGate.waitForAvailability(timeout: 600)
-            guard available else {
-                throw NSError(domain: "CoreMLStemSeparatorWrapper", code: 503, userInfo: [NSLocalizedDescriptionKey: "Processing queue timeout"])
-            }
-            
-            // Try again
-            guard processingGate.requestOperation(.separation) else {
-                throw NSError(domain: "CoreMLStemSeparatorWrapper", code: 503, userInfo: [NSLocalizedDescriptionKey: "Failed to acquire processing gate"])
-            }
-        }
-        
-        defer {
-            processingGate.completeOperation(.separation)
-        }
-        
         // Check thermal state
         if performanceGuard.isThermalThrottling() {
             Logger.shared.warning("⚠️ Device is thermally throttled, separation may be slow")
@@ -90,10 +70,6 @@ public class CoreMLStemSeparatorWrapper {
     // MARK: - Status
     
     public func isSeparationInProgress() -> Bool {
-        return processingGate.isOperationActive(.separation)
-    }
-    
-    public func getProcessingStatus() -> (active: ProcessingGate.ProcessingOperation?, queued: [ProcessingGate.ProcessingOperation]) {
-        return processingGate.getQueueStatus()
+        return performanceGuard.currentThermalState != "Nominal"
     }
 }
