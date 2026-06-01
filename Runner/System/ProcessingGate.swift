@@ -5,6 +5,16 @@ public class ProcessingGate {
     
     public static let shared = ProcessingGate()
     
+    /// Enum for different processing operation types
+    public enum ProcessingOperation: Equatable {
+        case separation
+        case chordDetection
+        case beatDetection
+        case export
+        case recording
+        case analysis
+    }
+    
     private var isProcessing = false
     private let queue = DispatchQueue(label: "com.musicx.processinggate", attributes: .concurrent)
     

@@ -145,20 +145,20 @@ class ImportSourceViewController: UIViewController {
     
     @objc private func importAudioTapped() {
         Logger.shared.log("Import audio tapped", level: .info)
-        presentDocumentPicker(for: .audio)
+        presentDocumentPicker()
     }
     
     @objc private func importVideoTapped() {
         Logger.shared.log("Import video tapped", level: .info)
-        presentDocumentPicker(for: .video)
+        presentDocumentPicker()
     }
     
     @objc private func browseFilesTapped() {
         Logger.shared.log("Browse files tapped", level: .info)
-        presentDocumentPicker(for: .audio)
+        presentDocumentPicker()
     }
     
-    private func presentDocumentPicker(for type: UIDocumentPickerViewController.DocumentPickerMode) {
+    private func presentDocumentPicker() {
         let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [.audio], asCopy: true)
         documentPicker.delegate = self
         present(documentPicker, animated: true)

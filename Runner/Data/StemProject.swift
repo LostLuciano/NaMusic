@@ -12,21 +12,6 @@ enum ProjectStatus: String, Codable {
     case cancelled = "Cancelled"
 }
 
-struct ChordSegment: Codable {
-    let timestamp: TimeInterval
-    let chord: String
-    let confidence: Float
-    let startTime: TimeInterval
-    let endTime: TimeInterval
-}
-
-struct BeatTempoResult: Codable {
-    let bpm: Double
-    let confidence: Float
-    let timeSignature: String
-    let beatTimings: [TimeInterval]
-}
-
 struct StemProject: Codable, Identifiable {
     let id: UUID
     var name: String  // Alias for title
