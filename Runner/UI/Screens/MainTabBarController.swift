@@ -68,7 +68,7 @@ class MainTabBarController: UITabBarController {
     }
     
     @objc private func fabTapped() {
-        Logger.shared.log("FAB tapped - New project", level: .info)
+        Logger.shared.info("FAB tapped - New project")
         
         // Show new project options
         let alert = UIAlertController(title: "Buat Proyek Baru", message: "Pilih sumber audio", preferredStyle: .actionSheet)
@@ -95,9 +95,11 @@ class MainTabBarController: UITabBarController {
     
     private func startProcessing(with audioURL: URL) {
         // Create new project
+        let fileName = audioURL.deletingPathExtension().lastPathComponent
         let project = StemProject(
             id: UUID(),
-            title: audioURL.deletingPathExtension().lastPathComponent,
+            name: fileName,
+            title: fileName,
             createdAt: Date(),
             originalAudioURL: audioURL,
             importedFileName: audioURL.lastPathComponent,

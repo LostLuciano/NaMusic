@@ -196,7 +196,7 @@ class ExportViewController: UIViewController {
     }
     
     @objc private func exportTapped() {
-        Logger.shared.log("Starting export for project: \(project?.title ?? "Unknown")", level: .info)
+        Logger.shared.info("Starting export for project: \(project?.title ?? "Unknown")")
         
         exportButton.isHidden = true
         progressRing.isHidden = false
@@ -215,7 +215,7 @@ class ExportViewController: UIViewController {
     }
     
     private func completeExport() {
-        Logger.shared.log("Export completed", level: .info)
+        Logger.shared.info("Export completed")
         onComplete?()
     }
 }

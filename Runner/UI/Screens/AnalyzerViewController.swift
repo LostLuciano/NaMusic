@@ -270,7 +270,7 @@ class AnalyzerViewController: UIViewController {
     }
     
     private func loadAnalysis() {
-        Logger.shared.log("Loading analysis for project: \(project?.title ?? "Unknown")", level: .info)
+        Logger.shared.info("Loading analysis for project: \(project?.title ?? "Unknown")")
     }
 }
 

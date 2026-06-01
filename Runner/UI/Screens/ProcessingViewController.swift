@@ -198,7 +198,7 @@ class ProcessingViewController: UIViewController {
     }
     
     private func startProcessing() {
-        Logger.shared.log("Starting processing for project: \(project?.title ?? "Unknown")", level: .info)
+        Logger.shared.info("Starting processing for project: \(project?.title ?? "Unknown")")
         
         // Simulate progress
         var progress: CGFloat = 0
@@ -215,12 +215,12 @@ class ProcessingViewController: UIViewController {
     }
     
     private func completeProcessing() {
-        Logger.shared.log("Processing completed", level: .info)
+        Logger.shared.info("Processing completed")
         onComplete?()
     }
     
     @objc private func cancelTapped() {
-        Logger.shared.log("Processing cancelled", level: .info)
+        Logger.shared.info("Processing cancelled")
         onCancel?()
     }
 }

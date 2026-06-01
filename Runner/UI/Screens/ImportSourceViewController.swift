@@ -144,17 +144,17 @@ class ImportSourceViewController: UIViewController {
     }
     
     @objc private func importAudioTapped() {
-        Logger.shared.log("Import audio tapped", level: .info)
+        Logger.shared.info("Import audio tapped")
         presentDocumentPicker()
     }
     
     @objc private func importVideoTapped() {
-        Logger.shared.log("Import video tapped", level: .info)
+        Logger.shared.info("Import video tapped")
         presentDocumentPicker()
     }
     
     @objc private func browseFilesTapped() {
-        Logger.shared.log("Browse files tapped", level: .info)
+        Logger.shared.info("Browse files tapped")
         presentDocumentPicker()
     }
     
@@ -169,7 +169,7 @@ class ImportSourceViewController: UIViewController {
 extension ImportSourceViewController: UIDocumentPickerDelegate {
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         guard let url = urls.first else { return }
-        Logger.shared.log("Document picked: \(url.lastPathComponent)", level: .info)
+        Logger.shared.info("Document picked: \(url.lastPathComponent)")
         onAudioSelected?(url)
     }
 }

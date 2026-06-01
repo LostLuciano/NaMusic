@@ -290,16 +290,16 @@ class HomeViewController: UIViewController {
     
     private func checkModelStatus() {
         // TODO: Connect to ModelManager untuk check status actual
-        Logger.shared.log("Checking AI model status...", level: .info)
+        Logger.shared.info("Checking AI model status...")
     }
     
     @objc private func importAudioTapped() {
-        Logger.shared.log("Import Audio tapped", level: .info)
+        Logger.shared.info("Import Audio tapped")
         onImportAudio?()
     }
     
     @objc private func importVideoTapped() {
-        Logger.shared.log("Import Video tapped", level: .info)
+        Logger.shared.info("Import Video tapped")
         onImportVideo?()
     }
 }

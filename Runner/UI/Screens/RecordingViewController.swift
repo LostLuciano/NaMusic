@@ -190,11 +190,11 @@ class RecordingViewController: UIViewController {
         if isRecording {
             recordButton.backgroundColor = StudioColors.statusError
             timerLabel.textColor = StudioColors.statusError
-            Logger.shared.log("Recording started", level: .info)
+            Logger.shared.info("Recording started")
         } else {
             recordButton.backgroundColor = UIColor(white: 1.0, alpha: 0.1)
             timerLabel.textColor = StudioColors.textSecondary
-            Logger.shared.log("Recording stopped", level: .info)
+            Logger.shared.info("Recording stopped")
         }
     }
 }

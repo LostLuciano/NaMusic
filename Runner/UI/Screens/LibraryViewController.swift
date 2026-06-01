@@ -67,7 +67,7 @@ class LibraryViewController: UIViewController {
     
     private func loadProjects() {
         // TODO: Load from ProjectStore
-        Logger.shared.log("Loading projects from store", level: .info)
+        Logger.shared.info("Loading projects from store")
     }
 }
 

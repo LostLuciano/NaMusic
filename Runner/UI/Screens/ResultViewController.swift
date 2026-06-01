@@ -180,26 +180,26 @@ class ResultViewController: UIViewController {
     
     private func loadStemsList() {
         // TODO: Load stems from project
-        Logger.shared.log("Loading stems for project: \(project?.title ?? "Unknown")", level: .info)
+        Logger.shared.info("Loading stems for project: \(project?.title ?? "Unknown")")
     }
     
     @objc private func mixerTapped() {
-        Logger.shared.log("Open Mixer", level: .info)
+        Logger.shared.info("Open Mixer")
         onOpenMixer?()
     }
     
     @objc private func analyzerTapped() {
-        Logger.shared.log("Open Analyzer", level: .info)
+        Logger.shared.info("Open Analyzer")
         onOpenAnalyzer?()
     }
     
     @objc private func exportTapped() {
-        Logger.shared.log("Export stems", level: .info)
+        Logger.shared.info("Export stems")
         onExport?()
     }
     
     @objc private func saveTapped() {
-        Logger.shared.log("Save project", level: .info)
+        Logger.shared.info("Save project")
         onSave?()
     }
 }

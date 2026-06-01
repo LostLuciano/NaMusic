@@ -282,7 +282,7 @@ class MixerViewController: UIViewController {
     }
     
     private func setupMixer() {
-        Logger.shared.log("Setting up mixer for project: \(project?.title ?? "Unknown")", level: .info)
+        Logger.shared.info("Setting up mixer for project: \(project?.title ?? "Unknown")")
         // TODO: Load stems and configure mixer
     }
 }
