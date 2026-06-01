@@ -1,159 +1,313 @@
-name: Build iOS IPA
+name: Build Standalone Native iOS ZIP
 
 on:
   push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-ios-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  ZIP_NAME: MusicX.zip
 
 jobs:
-  build:
-    runs-on: macos-latest
-    
+  build-ios:
+    name: Build iOS Application (Unsigned)
+    runs-on: macos-15
+    timeout-minutes: 90
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        lfs: true
-    
-    - name: Select Xcode version
-      run: |
-        sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
-        xcodebuild -version
-    
-    - name: Install dependencies
-      run: |
-        if [ -f "Podfile" ]; then
-          pod install --repo-update
-        fi
-    
-    - name: Validate Xcode project
-      run: |
-        python3 scripts/validate_pbxproj.py
-        if [ $? -ne 0 ]; then
-          echo "❌ Project validation failed"
-          exit 1
-        fi
-    
-    - name: Clean build folder
-      run: |
-        rm -rf build/
-        rm -rf ~/Library/Developer/Xcode/DerivedData/*MusicXNA*
-    
-    - name: Build for iOS (Release)
-      run: |
-        xcodebuild clean build \
-          -project MusicXNA.xcodeproj \
-          -scheme MusicXNA \
-          -configuration Release \
-          -destination 'generic/platform=iOS' \
-          -archivePath build/MusicXNA.xcarchive \
-          -derivedDataPath build/DerivedData \
-          CODE_SIGNING_ALLOWED=NO \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGN_IDENTITY="" \
-          DEVELOPMENT_TEAM="" \
-          PROVISIONING_PROFILE="" \
-          PROVISIONING_PROFILE_SPECIFIER="" \
-          IPHONEOS_DEPLOYMENT_TARGET=18.0 \
-          SWIFT_VERSION=5.0 \
-          SUPPORTED_PLATFORMS="iphoneos iphonesimulator" \
-          2>&1 | tee build.log
-        
-        BUILD_EXIT=${PIPESTATUS[0]}
-        if [ $BUILD_EXIT -ne 0 ]; then
-          echo "❌ Build failed with exit code $BUILD_EXIT"
-          tail -100 build.log
-          exit $BUILD_EXIT
-        fi
-    
-    - name: Archive iOS app
-      if: success()
-      run: |
-        xcodebuild \
-          -project MusicXNA.xcodeproj \
-          -scheme MusicXNA \
-          -configuration Release \
-          -destination 'generic/platform=iOS' \
-          -archivePath build/MusicXNA.xcarchive \
-          archive \
-          CODE_SIGNING_ALLOWED=NO \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGN_IDENTITY="" \
-          DEVELOPMENT_TEAM=""
-    
-    - name: Export unsigned IPA
-      if: success()
-      run: |
-        mkdir -p build/output
-        
-        # Use exportOptions-unsigned.plist for unsigned export
-        xcodebuild \
-          -exportArchive \
-          -archivePath build/MusicXNA.xcarchive \
-          -exportPath build/output \
-          -exportOptionsPlist Runner/ExportOptions-unsigned.plist \
-          CODE_SIGNING_ALLOWED=NO \
-          CODE_SIGNING_REQUIRED=NO
-    
-    - name: Create unsigned app bundle
-      if: success()
-      run: |
-        # If IPA export fails, try extracting app from archive
-        if [ ! -f "build/output/MusicXNA.ipa" ]; then
-          echo "📦 Creating app bundle from archive..."
-          mkdir -p build/output
-          
-          # Extract app from archive
-          cd build/MusicXNA.xcarchive/Products/Applications
-          zip -r ../../output/MusicXNA.app.zip MusicXNA.app
-          cd ../../../../../../
-          
-          # Rename to .ipa for distribution
-          if [ -f "build/output/MusicXNA.app.zip" ]; then
-            mv build/output/MusicXNA.app.zip build/output/MusicXNA.ipa
-            echo "✅ Created MusicXNA.ipa (app bundle)"
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Checkout LFS Objects
+        run: |
+          git lfs install
+          git lfs pull
+          echo "=== LFS file sizes ==="
+          find Runner -name "*.mlmodelc" -o -name "*.m4a" -o -name "*.caf" | head -10 | xargs ls -lh 2>/dev/null || true
+          wc -c Runner/Vocals.m4a 2>/dev/null || true
+
+      - name: Show Available Xcode Versions
+        run: |
+          ls /Applications | grep Xcode || true
+
+      - name: Select Xcode 16
+        run: |
+          if [ -d "/Applications/Xcode_16.4.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
+          elif [ -d "/Applications/Xcode_16.3.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.3.app/Contents/Developer
+          elif [ -d "/Applications/Xcode_16.2.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+          elif [ -d "/Applications/Xcode_16.1.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.1.app/Contents/Developer
+          elif [ -d "/Applications/Xcode_16.0.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.0.app/Contents/Developer
+          else
+            echo "Xcode 16 not found. iOS 18 build requires Xcode 16 or newer."
+            exit 1
           fi
-        fi
-    
-    - name: List output files
-      if: success()
-      run: |
-        echo "📂 Build artifacts:"
-        ls -lah build/output/
-        du -sh build/output/*
-    
-    - name: Upload IPA artifact
-      if: success()
-      uses: actions/upload-artifact@v4
-      with:
-        name: MusicXNA-unsigned
-        path: build/output/
-        retention-days: 30
-    
-    - name: Upload build log
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-log
-        path: build.log
-        retention-days: 7
-    
-    - name: Summary
-      if: always()
-      run: |
-        echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "**Project:** MusicXNA" >> $GITHUB_STEP_SUMMARY
-        echo "**Platform:** iOS (unsigned)" >> $GITHUB_STEP_SUMMARY
-        echo "**Deployment Target:** iOS 18.0+" >> $GITHUB_STEP_SUMMARY
-        echo "**Build Configuration:** Release" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        
-        if [ -f "build/output/MusicXNA.ipa" ]; then
-          SIZE=$(du -h build/output/MusicXNA.ipa | cut -f1)
-          echo "✅ **Status:** Build Successful" >> $GITHUB_STEP_SUMMARY
-          echo "📦 **Output:** MusicXNA.ipa ($SIZE)" >> $GITHUB_STEP_SUMMARY
-        else
-          echo "❌ **Status:** Build Failed" >> $GITHUB_STEP_SUMMARY
-        fi
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+
+      - name: Clear Xcode Cache
+        run: |
+          rm -rf ~/Library/Developer/Xcode/DerivedData/*
+          rm -rf ~/Library/Caches/com.apple.dt.Xcode
+
+      - name: Debug Swift Files and project.pbxproj
+        run: |
+          echo "=== Swift files in Runner directory ==="
+          find Runner -maxdepth 5 -name "*.swift" -type f | sort
+          echo ""
+          echo "=== Checking project.pbxproj structure ==="
+          head -100 MusicXNA.xcodeproj/project.pbxproj | tail -50
+
+      - name: Validate PBXSourcesBuildPhase Configuration
+        run: |
+          python3 - <<'VALIDATION_PY'
+          import re
+          from pathlib import Path
+          
+          pbx_path = Path("MusicXNA.xcodeproj/project.pbxproj")
+          pbx_content = pbx_path.read_text()
+          
+          print("=" * 70)
+          print("VALIDATION: Swift files in Build Phases")
+          print("=" * 70)
+          
+          # Count Swift file references
+          swift_refs = re.findall(r'PBXFileReference.*?\.swift', pbx_content)
+          print(f"✓ Found {len(swift_refs)} Swift file references")
+          
+          # Check PBXSourcesBuildPhase
+          sources_phase = re.search(r'PBXSourcesBuildPhase.*?files = \((.*?)\);', pbx_content, re.DOTALL)
+          if sources_phase:
+              build_files = re.findall(r'([A-F0-9]{24}).*?in Sources', sources_phase.group(1))
+              print(f"✓ Found {len(build_files)} files in PBXSourcesBuildPhase")
+          else:
+              print("✗ PBXSourcesBuildPhase not found")
+              exit(1)
+          
+          print("\n" + "=" * 70)
+          print("VALIDATION PASSED")
+          print("=" * 70)
+          VALIDATION_PY
+
+      - name: Verify All Swift Files Are In Xcode Project
+        run: |
+          echo "========================================================================"
+          echo "Verifying ALL Swift files are included in Xcode project"
+          echo "========================================================================"
+          
+          # Find all Swift files
+          echo "Finding all Swift files in Runner directory..."
+          find Runner -name "*.swift" -type f | grep -v "Test" | sort > all_swift_files.txt
+          TOTAL_FILES=$(wc -l < all_swift_files.txt)
+          echo "Found $TOTAL_FILES Swift files on disk"
+          
+          # Extract Swift files from project.pbxproj
+          echo ""
+          echo "Extracting Swift files from project.pbxproj..."
+          grep -o '[^/]*\.swift' MusicXNA.xcodeproj/project.pbxproj | sort | uniq > project_swift_files.txt
+          PROJECT_FILES=$(wc -l < project_swift_files.txt)
+          echo "Found $PROJECT_FILES Swift files in project.pbxproj"
+          
+          # Find missing files
+          echo ""
+          echo "Checking for missing files..."
+          MISSING_COUNT=0
+          while IFS= read -r filepath; do
+              filename=$(basename "$filepath")
+              if ! grep -q "$filename" project_swift_files.txt; then
+                  if [ $MISSING_COUNT -eq 0 ]; then
+                      echo ""
+                      echo "⚠️  MISSING SWIFT FILES:"
+                  fi
+                  echo "  - $filepath"
+                  MISSING_COUNT=$((MISSING_COUNT + 1))
+              fi
+          done < all_swift_files.txt
+          
+          echo ""
+          echo "========================================================================"
+          if [ $MISSING_COUNT -eq 0 ]; then
+              echo "✓ SUCCESS: All Swift files are in the Xcode project!"
+              echo "========================================================================"
+          else
+              echo "❌ FAILURE: $MISSING_COUNT Swift files are missing from Xcode project!"
+              echo "========================================================================"
+              exit 1
+          fi
+
+      - name: Verify LFS Files
+        run: |
+          echo "=== Checking LFS file status ==="
+          git lfs ls-files | head -20
+          echo "=== Verifying critical audio files ==="
+          for file in Runner/Resources/Audio/Vocals.m4a Runner/Resources/Audio/Drums.m4a Runner/Resources/Audio/Guitar.m4a Runner/Resources/Audio/Others.m4a; do
+              if [ -f "$file" ]; then
+                  size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null || echo "unknown")
+                  echo "✓ $file exists (size: $size bytes)"
+              else
+                  echo "✗ $file MISSING"
+              fi
+          done
+          echo "=== Verifying CoreML models ==="
+          for model in Runner/Resources/Models/*.mlmodelc; do
+              if [ -d "$model" ]; then
+                  echo "✓ $(basename $model) exists"
+              fi
+          done
+
+      - name: Build and Archive (Unsigned)
+        run: |
+          set -o pipefail
+          xcodebuild archive \
+            -project MusicXNA.xcodeproj \
+            -scheme MusicXNA \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath build/MusicXNA.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES 2>&1 | tee build_output.log
+          
+          # If build failed, extract and display Swift compilation errors
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then
+              echo ""
+              echo "=========================================="
+              echo "BUILD FAILED - EXTRACTING SWIFT ERRORS"
+              echo "=========================================="
+              
+              # Extract Swift compilation errors
+              grep -A 20 "error:" build_output.log | head -100 || true
+              
+              # Extract specific file errors
+              echo ""
+              echo "=========================================="
+              echo "ERRORS BY FILE:"
+              echo "=========================================="
+              grep -B 2 "error:" build_output.log | grep "\.swift" || true
+              
+              # Show the actual error messages
+              echo ""
+              echo "=========================================="
+              echo "DETAILED ERROR MESSAGES:"
+              echo "=========================================="
+              awk '/error:/ {print; for(i=1; i<=5; i++) {getline; print}}' build_output.log | head -200
+              
+              exit 1
+          fi
+
+      - name: Package IPA and ZIP
+        run: |
+          set -e
+          
+          # Dynamically find the .app bundle (could be MusicXNA.app or other name)
+          ARCHIVE_APPS_DIR="build/MusicXNA.xcarchive/Products/Applications"
+          if [ ! -d "$ARCHIVE_APPS_DIR" ]; then
+              echo "ERROR: Applications directory not found in archive"
+              find build -name "*.app" -type d 2>/dev/null || true
+              exit 1
+          fi
+          
+          # Find the first .app bundle in the archive
+          ARCHIVE_APP_PATH=$(find "$ARCHIVE_APPS_DIR" -maxdepth 1 -name "*.app" -type d | head -1)
+          if [ -z "$ARCHIVE_APP_PATH" ] || [ ! -d "$ARCHIVE_APP_PATH" ]; then
+              echo "ERROR: No .app bundle found inside archive"
+              echo "Contents of $ARCHIVE_APPS_DIR:"
+              ls -la "$ARCHIVE_APPS_DIR" 2>/dev/null || true
+              find build -name "*.app" -type d 2>/dev/null || true
+              exit 1
+          fi
+          
+          APP_NAME=$(basename "$ARCHIVE_APP_PATH")
+          echo "Found app bundle: $APP_NAME"
+          echo "App bundle size: $(du -sh "$ARCHIVE_APP_PATH" | cut -f1)"
+          echo "Packaging native app bundle: $ARCHIVE_APP_PATH"
+          
+          # 1. Create Payload folder and copy app into it using ditto (more reliable for large dirs)
+          PACKAGE_DIR="${RUNNER_TEMP}/ipa_package"
+          rm -rf "$PACKAGE_DIR"
+          mkdir -p "$PACKAGE_DIR/Payload"
+          echo "Copying app bundle to Payload..."
+          ditto "$ARCHIVE_APP_PATH" "$PACKAGE_DIR/Payload/$APP_NAME"
+          
+          # 2. Create the Unsigned IPA file (ready for ESign)
+          IPA_NAME="MusicX.ipa"
+          echo "Creating IPA archive..."
+          cd "$PACKAGE_DIR"
+          zip -r -q "${{ github.workspace }}/$IPA_NAME" Payload
+          
+          # 3. Create the ZIP containing the IPA file for deployment
+          echo "Creating distribution ZIP..."
+          cd "${{ github.workspace }}"
+          zip -r -q "${{ env.ZIP_NAME }}" "$IPA_NAME"
+          
+          echo "=== Packaging Complete ==="
+          ls -lh "${{ env.ZIP_NAME }}"
+          ls -lh "$IPA_NAME"
+
+      - name: Upload ZIP Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MusicX-Native-iOS-ZIP
+          path: ${{ env.ZIP_NAME }}
+          retention-days: 30
+
+      - name: Upload Build Logs on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-build-logs
+          path: build_output.log
+          retention-days: 7
+
+      - name: Upload Swift Error Logs
+        if: failure()
+        run: |
+          if [ -f build_output.log ]; then
+              echo "Extracting Swift errors from build log..."
+              grep -i "error\|warning" build_output.log > swift_errors.txt || true
+              if [ -s swift_errors.txt ]; then
+                  echo "Found errors/warnings:"
+                  head -50 swift_errors.txt
+              fi
+          fi
+
+      - name: Build Summary
+        if: always()
+        run: |
+          echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Project:** MusicXNA (Native Swift/UIKit)" >> $GITHUB_STEP_SUMMARY
+          echo "**Platform:** iOS 18.0+ (Unsigned)" >> $GITHUB_STEP_SUMMARY
+          echo "**Build Type:** Release Archive" >> $GITHUB_STEP_SUMMARY
+          echo "**Code Signing:** Disabled (ESign Compatible)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f "${{ env.ZIP_NAME }}" ]; then
+              SIZE=$(du -h "${{ env.ZIP_NAME }}" | cut -f1)
+              echo "✅ **Build Status:** SUCCESS" >> $GITHUB_STEP_SUMMARY
+              echo "📦 **Output:** MusicX.zip ($SIZE)" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "### Download & Install" >> $GITHUB_STEP_SUMMARY
+              echo "1. Download MusicX.zip from artifacts" >> $GITHUB_STEP_SUMMARY
+              echo "2. Extract MusicX.ipa" >> $GITHUB_STEP_SUMMARY
+              echo "3. Use ESign or similar tool to install on device" >> $GITHUB_STEP_SUMMARY
+          else
+              echo "❌ **Build Status:** FAILED" >> $GITHUB_STEP_SUMMARY
+              echo "See logs for details" >> $GITHUB_STEP_SUMMARY
+          fi
