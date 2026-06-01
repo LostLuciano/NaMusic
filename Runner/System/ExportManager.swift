@@ -176,8 +176,7 @@ public class ExportManager {
         }
     }
     
-    /// Export project with all stems and metadata
-    public func exportProject(
+    private func _exportProject(
         _ project: StemProject,
         format: ExportFormat = .m4a,
         progress: @escaping (Float) -> Void,
@@ -188,20 +187,19 @@ public class ExportManager {
             
             do {
                 // Create project export directory
-                let projectExportDir = self.tempDirectory.appendingPathComponent(project.id)
+                let projectExportDir = self.tempDirectory.appendingPathComponent(project.id.uuidString)
                 try self.fileManager.createDirectory(
                     at: projectExportDir,
                     withIntermediateDirectories: true
                 )
                 
                 // Export metadata
-                let metadata = [
+                let metadata: [String: Any] = [
                     "name": project.name,
-                    "id": project.id,
+                    "id": project.id.uuidString,
                     "createdAt": ISO8601DateFormatter().string(from: project.createdAt),
-                    "duration": String(project.duration),
-                    "bpm": String(project.bpm),
-                    "genre": project.genre ?? "Unknown"
+                    "duration": project.duration,
+                    "bpm": project.bpm ?? 0
                 ]
                 
                 let metadataJSON = try JSONSerialization.data(
@@ -290,9 +288,7 @@ public class ExportManager {
         quality: AudioQuality,
         progress: @escaping (Float) -> Void
     ) throws -> URL {
-        guard let originalURL = project.originalAudioURL else {
-            throw ExportError.invalidProject
-        }
+        let originalURL = project.originalAudioURL
         
         // Create output file
         let outputFileName = "\(project.name)_mix.\(format.fileExtension)"

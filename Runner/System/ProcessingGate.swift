@@ -16,6 +16,7 @@ public class ProcessingGate {
     }
     
     private var isProcessing = false
+    private var currentOperation: ProcessingOperation?
     private let queue = DispatchQueue(label: "com.musicx.processinggate", attributes: .concurrent)
     
     public init() {}
@@ -27,6 +28,30 @@ public class ProcessingGate {
             result = isProcessing
         }
         return result
+    }
+    
+    /// Request to start a processing operation
+    /// - Returns: true if operation can start immediately, false if already processing
+    public func requestOperation(_ operation: ProcessingOperation) -> Bool {
+        var acquired = false
+        queue.async(flags: .barrier) {
+            if !self.isProcessing {
+                self.isProcessing = true
+                self.currentOperation = operation
+                acquired = true
+            }
+        }
+        return acquired
+    }
+    
+    /// Complete a processing operation
+    public func completeOperation(_ operation: ProcessingOperation) {
+        queue.async(flags: .barrier) {
+            if self.currentOperation == operation {
+                self.isProcessing = false
+                self.currentOperation = nil
+            }
+        }
     }
     
     /// Try to acquire processing lock

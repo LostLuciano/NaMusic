@@ -40,6 +40,11 @@ public struct StemProject: Codable, Identifiable {
     public var pianoURL: URL? { stemPaths["piano"] }
     public var otherURL: URL? { stemPaths["other"] }
     
+    /// All stem URLs as a dictionary
+    public var stemURLs: [String: URL] {
+        return stemPaths
+    }
+    
     // MARK: - Computed Properties
     public var displayDuration: String {
         let minutes = Int(duration) / 60

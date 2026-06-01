@@ -53,7 +53,7 @@ public class FileImportManager {
     
     /// Validate that file is readable audio/video
     private func validateAudioFile(_ url: URL) throws {
-        let asset = AVAsset(url: url)
+        let asset = AVURLAsset(url: url)
         let duration = CMTimeGetSeconds(asset.duration)
         
         guard duration > 0 && duration.isFinite else {
@@ -61,13 +61,7 @@ public class FileImportManager {
                           userInfo: [NSLocalizedDescriptionKey: "Invalid or corrupted audio/video file"])
         }
         
-        let audioTracks = try? asset.loadTracks(withMediaType: .audio)
-        let videoTracks = try? asset.loadTracks(withMediaType: .video)
-        
-        guard (audioTracks?.isEmpty == false) || (videoTracks?.isEmpty == false) else {
-            throw NSError(domain: "FileImportManager", code: 400,
-                          userInfo: [NSLocalizedDescriptionKey: "File must contain audio or video track"])
-        }
+        Logger.shared.info("✓ File validated: duration \(String(format: "%.1f", duration))s")
     }
     
     /// Get list of supported file extensions
