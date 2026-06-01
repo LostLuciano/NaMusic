@@ -54,10 +54,17 @@
 	</array>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>MusicX needs access to your microphone to record audio and analyze chord/beat in real-time.</string>
-	<key>AVAudioDefaultToSpeakerRoute</key>
-	<true/>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>MusicX accesses your music library to analyze songs and extract stems.</string>
 	<key>NSDocumentsFolderUsageDescription</key>
 	<string>MusicX stores audio files and analysis data in your Documents folder.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>MusicX may use local network for audio streaming features.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_musicx._tcp</string>
+		<string>_musicx._udp</string>
+	</array>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>microphone</string>
@@ -77,5 +84,9 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<false/>
 	</dict>
+	<key>AVAudioDefaultToSpeakerRoute</key>
+	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>MusicX may access photos for album art or audio file management.</string>
 </dict>
 </plist>
