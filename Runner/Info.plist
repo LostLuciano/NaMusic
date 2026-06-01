@@ -20,12 +20,8 @@
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	
-	<!-- Minimum iOS Version: 18.0 -->
 	<key>MinimumOSVersion</key>
 	<string>18.0</string>
-	
-	<!-- User Interface -->
 	<key>UIMainStoryboardFile</key>
 	<string></string>
 	<key>UIApplicationSceneManifest</key>
@@ -45,8 +41,6 @@
 			</array>
 		</dict>
 	</key>
-	
-	<!-- Supported Orientations -->
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -57,39 +51,27 @@
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
-	</key>
-	
-	<!-- Audio Permissions -->
+	</array>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>MusicX needs access to your microphone to record audio and analyze chord/beat in real-time.</string>
 	<key>AVAudioDefaultToSpeakerRoute</key>
 	<true/>
-	
-	<!-- File Access -->
 	<key>NSDocumentsFolderUsageDescription</key>
 	<string>MusicX stores audio files and analysis data in your Documents folder.</string>
-	
-	<!-- App Capabilities -->
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>microphone</string>
 		<string>audio</string>
 	</array>
-	
-	<!-- Localization -->
 	<key>CFBundleLocalizations</key>
 	<array>
 		<string>en</string>
 		<string>id</string>
 	</array>
-	
-	<!-- Status Bar -->
 	<key>UIStatusBarStyle</key>
 	<string>UIStatusBarStyleLightContent</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	
-	<!-- App Transport Security -->
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
