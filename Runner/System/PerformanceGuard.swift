@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 /// Monitors thermal state, memory usage, and processing stage timing.
 public class PerformanceGuard {
@@ -11,6 +12,8 @@ public class PerformanceGuard {
     
     private var stageStartTime: Date?
     private var currentStage: String?
+    private var thermalState: ProcessInfo.ThermalState = .nominal
+    private let lock = NSLock()
     
     public init() {
         startMonitoring()
@@ -25,7 +28,10 @@ public class PerformanceGuard {
     private func updateMetrics() {
         // Thermal state monitoring
         #if os(iOS)
-        let thermalState = ProcessInfo.processInfo.thermalState
+        let newThermalState = ProcessInfo.processInfo.thermalState
+        if newThermalState != thermalState {
+            thermalState = newThermalState
+        }
         currentThermalState = String(describing: thermalState)
         #endif
         
@@ -50,10 +56,20 @@ public class PerformanceGuard {
         }
     }
     
+    /// Check if device is thermally throttling
+    public func isThermalThrottling() -> Bool {
+        return thermalState.rawValue >= ProcessInfo.ThermalState.serious.rawValue
+    }
+    
     /// Start timing a processing stage
     public func startStage(_ stageName: String) {
         currentStage = stageName
         stageStartTime = Date()
+    }
+    
+    /// Start an operation (for compatibility)
+    public func startOperation(_ operationName: String) {
+        startStage(operationName)
     }
     
     /// End timing current stage
@@ -62,6 +78,16 @@ public class PerformanceGuard {
         let duration = Date().timeIntervalSince(startTime)
         stageTiming[stage] = duration
         print("PerformanceGuard: Stage '\(stage)' took \(String(format: "%.2f", duration))s")
+    }
+    
+    /// End an operation (for compatibility)
+    public func endOperation(_ operationName: String) {
+        endStage()
+    }
+    
+    /// Add checkpoint during operation
+    public func addCheckpoint(_ operationName: String, checkpoint: String) {
+        Logger.shared.info("✓ \(operationName) → \(checkpoint)")
     }
     
     /// Get all stage timings

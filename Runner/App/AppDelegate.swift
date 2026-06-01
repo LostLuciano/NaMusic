@@ -31,32 +31,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     private func initializeManagers() {
         // Logger
-        Logger.shared.log("🚀 App launched - Initializing managers", level: .info)
+        Logger.shared.info("🚀 App launched - Initializing managers")
         
         // Model Manager - check all CoreML models
-        Logger.shared.log("📊 Checking CoreML models...", level: .info)
+        Logger.shared.info("📊 Checking CoreML models...")
         ModelManager.shared.checkAllModels()
         let modelStatus = ModelManager.shared.getAllModelStatuses()
         for (model, status) in modelStatus {
-            Logger.shared.log("  \(model): \(status)", level: .debug)
+            Logger.shared.debug("  \(model): \(status)")
         }
         
         // Project Store - verify directory
-        Logger.shared.log("💾 Initializing project storage...", level: .info)
+        Logger.shared.info("💾 Initializing project storage...")
         let projectCount = ProjectStore.shared.getProjectCount()
-        Logger.shared.log("  Found \(projectCount) existing projects", level: .debug)
+        Logger.shared.debug("  Found \(projectCount) existing projects")
         
         // Cache Manager - check cache size
-        Logger.shared.log("🗄️  Initializing cache...", level: .info)
+        Logger.shared.info("🗄️  Initializing cache...")
         let cacheSize = CacheManager.shared.getFormattedCacheSize()
-        Logger.shared.log("  Cache size: \(cacheSize)", level: .debug)
+        Logger.shared.debug("  Cache size: \(cacheSize)")
         CacheManager.shared.cleanupIfNeeded()
         
         // Processing Gate - ready
-        Logger.shared.log("🚪 Processing gate ready", level: .info)
+        Logger.shared.info("🚪 Processing gate ready")
         
         // Performance Guard - start monitoring
-        Logger.shared.log("📈 Performance monitoring started", level: .info)
+        Logger.shared.info("📈 Performance monitoring started")
         
         Logger.shared.success("✅ All managers initialized successfully")
     }
@@ -82,9 +82,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             
             try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
             
-            Logger.shared.log("✓ Audio session configured", level: .info)
+            Logger.shared.info("✓ Audio session configured")
         } catch {
-            Logger.shared.log("✗ Audio session error: \(error)", level: .error)
+            Logger.shared.error("✗ Audio session error: \(error)")
         }
     }
     
@@ -101,14 +101,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func applicationDidEnterBackground(_ application: UIApplication) {
-        Logger.shared.log("📦 App entered background", level: .info)
+        Logger.shared.info("📦 App entered background")
     }
     
     func applicationWillEnterForeground(_ application: UIApplication) {
-        Logger.shared.log("📂 App entered foreground", level: .info)
+        Logger.shared.info("📂 App entered foreground")
     }
     
     func applicationWillTerminate(_ application: UIApplication) {
-        Logger.shared.log("🔌 App terminating", level: .info)
+        Logger.shared.info("🔌 App terminating")
     }
 }

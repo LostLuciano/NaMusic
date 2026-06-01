@@ -7,6 +7,7 @@ public class CacheManager {
     
     private let cacheDirectory: URL
     private let maxCacheSizeMB: Int64 = 500
+    private var trackedFiles: Set<String> = []
     
     public init() {
         let paths = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)
@@ -24,6 +25,20 @@ public class CacheManager {
     public func hasCached(forKey key: String) -> Bool {
         let url = getCacheURL(forKey: key)
         return FileManager.default.fileExists(atPath: url.path)
+    }
+    
+    /// Create temporary file with tracking
+    public func createTempFile(withExtension ext: String) -> URL {
+        let fileName = "temp_\(UUID().uuidString).\(ext)"
+        let url = cacheDirectory.appendingPathComponent(fileName)
+        trackedFiles.insert(url.path)
+        return url
+    }
+    
+    /// Track output file
+    public func trackOutputFile(_ url: URL) {
+        trackedFiles.insert(url.path)
+        Logger.shared.info("📤 Tracked output file: \(url.lastPathComponent)")
     }
     
     /// Get current cache size in MB
@@ -67,6 +82,7 @@ public class CacheManager {
     public func clearAllCache() {
         try? FileManager.default.removeItem(at: cacheDirectory)
         try? FileManager.default.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
+        trackedFiles.removeAll()
         print("CacheManager: All cache cleared")
     }
     
@@ -97,6 +113,7 @@ public class CacheManager {
                let size = attr[.size] as? Int64 {
                 try? FileManager.default.removeItem(at: url)
                 deletedSize += size
+                trackedFiles.remove(url.path)
             }
         }
         

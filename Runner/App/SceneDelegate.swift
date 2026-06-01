@@ -16,26 +16,26 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.rootViewController = tabBarController
         window?.makeKeyAndVisible()
         
-        Logger.shared.log("🔗 Scene connected", level: .info)
+        Logger.shared.info("🔗 Scene connected")
     }
     
     func sceneDidDisconnect(_ scene: UIScene) {
-        Logger.shared.log("Scene disconnected", level: .info)
+        Logger.shared.info("Scene disconnected")
     }
     
     func sceneDidBecomeActive(_ scene: UIScene) {
-        Logger.shared.log("Scene became active", level: .info)
+        Logger.shared.info("Scene became active")
     }
     
     func sceneWillResignActive(_ scene: UIScene) {
-        Logger.shared.log("Scene will resign active", level: .info)
+        Logger.shared.info("Scene will resign active")
     }
     
     func sceneWillEnterForeground(_ scene: UIScene) {
-        Logger.shared.log("Scene entering foreground", level: .info)
+        Logger.shared.info("Scene entering foreground")
     }
     
     func sceneDidEnterBackground(_ scene: UIScene) {
-        Logger.shared.log("Scene entered background", level: .info)
+        Logger.shared.info("Scene entered background")
     }
 }
