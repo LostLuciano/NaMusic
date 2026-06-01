@@ -1,0 +1,63 @@
+// Template untuk generate project.pbxproj
+// Untuk production, gunakan xcodebuild atau swift package manager
+
+// BUILD SETTINGS REFERENCE untuk iOS 18.0+:
+//
+// PRODUCT_NAME = Runner
+// PRODUCT_BUNDLE_IDENTIFIER = com.musicx.native
+// IPHONEOS_DEPLOYMENT_TARGET = 18.0
+// SWIFT_VERSION = 5.0
+// ENABLE_BITCODE = NO
+// CODE_SIGN_STYLE = Automatic
+// CLANG_ENABLE_OBJC_ARC = YES
+// SWIFT_COMPILATION_MODE = wholemodule (Release) / incremental (Debug)
+//
+// FRAMEWORK_SEARCH_PATHS = $(inherited)
+// HEADER_SEARCH_PATHS = $(inherited) $(PROJECT_DIR)/Runner
+// 
+// Linked Frameworks and Libraries:
+// - AVFoundation.framework
+// - AVAudioKit.framework  
+// - CoreML.framework
+// - Accelerate.framework
+// - UniformTypeIdentifiers.framework
+// - FileManager.framework (implicit)
+// - UserDefaults.framework (implicit)
+// - UIKit.framework
+// - Foundation.framework
+// - CoreFoundation.framework
+//
+// Copy Bundle Resources:
+// - All .mlmodelc files from Runner/Resources/Models/
+// - All .m4a, .caf, .wav files from Runner/Resources/Audio/
+// - All .json files from Runner/Resources/DemoAnalysis/
+// - Assets.xcassets
+// - Base.lproj/LaunchScreen.storyboard
+//
+// Source Files to Compile:
+// Runner/App/*.swift
+// Runner/UI/Theme/*.swift
+// Runner/UI/Components/*.swift
+// Runner/UI/Screens/*.swift
+// Runner/Audio/*.swift
+// Runner/AI/*.swift
+// Runner/DSP/*.swift
+// Runner/Data/*.swift
+// Runner/System/*.swift
+
+// Untuk create Xcode project, gunakan:
+// xcodebuild -create-xcodeproj MusicXNative.xcodeproj -scheme Runner
+
+// Atau gunakan Swift Package Manager:
+// swift package init --type app --name MusicXNative
+
+// QUICK START BUILD:
+// 1. Open Xcode
+// 2. File > New > Project
+// 3. Choose "App"
+// 4. Product Name: Runner, Organization Identifier: com.musicx
+// 5. Set Deployment Target: iOS 18.0
+// 6. Copy all files to project directories
+// 7. Add files to target membership
+// 8. Link frameworks
+// 9. Build & Run

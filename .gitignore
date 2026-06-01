@@ -1,0 +1,61 @@
+# Xcode
+build/
+DerivedData/
+.DS_Store
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/xcshareddata/xcschemes/*.xcscheme
+*.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+
+# Swift
+.swiftpm/
+.build/
+*.swiftdeps
+*.swiftdoc
+
+# Pod
+Pods/
+Podfile.lock
+*.podspec.lock
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+*.swp
+*~.nib
+
+# Environment
+.env
+.env.local
+.venv/
+venv/
+ENV/
+
+# Project specific
+Documents/Projects/
+Documents/Imports/
+Documents/Cache/
+*.log
+.debug/
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Temporary
+*.tmp
+*.temp
+.DS_Store
