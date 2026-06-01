@@ -1,6 +1,6 @@
 import Foundation
 
-enum ProjectStatus: String, Codable {
+public enum ProjectStatus: String, Codable {
     case imported = "Imported"
     case separating = "Separating"
     case separated = "Separated"
@@ -12,64 +12,64 @@ enum ProjectStatus: String, Codable {
     case cancelled = "Cancelled"
 }
 
-struct StemProject: Codable, Identifiable {
-    let id: UUID
-    var name: String  // Alias for title
-    var title: String
-    var createdAt: Date
-    var createdDate: Date { createdAt }  // For compatibility
-    var originalAudioURL: URL
-    var importedFileName: String
-    var duration: Double
-    var format: String
-    var sampleRate: Double
-    var bpm: Double?
-    var key: String?
-    var status: ProjectStatus
-    var stemPaths: [String: URL]          // "vocals", "drums", "bass", "guitar", "piano", "others"
-    var chordSegments: [ChordSegment]
-    var beatResult: BeatTempoResult?
-    var lyricsPath: URL?
-    var waveformCachePath: URL?
+public struct StemProject: Codable, Identifiable {
+    public let id: UUID
+    public var name: String  // Alias for title
+    public var title: String
+    public var createdAt: Date
+    public var createdDate: Date { createdAt }  // For compatibility
+    public var originalAudioURL: URL
+    public var importedFileName: String
+    public var duration: Double
+    public var format: String
+    public var sampleRate: Double
+    public var bpm: Double?
+    public var key: String?
+    public var status: ProjectStatus
+    public var stemPaths: [String: URL]          // "vocals", "drums", "bass", "guitar", "piano", "others"
+    public var chordSegments: [ChordSegment]
+    public var beatResult: BeatTempoResult?
+    public var lyricsPath: URL?
+    public var waveformCachePath: URL?
     
     // Aliases for stem-specific URLs
-    var vocalsURL: URL? { stemPaths["vocals"] }
-    var drumsURL: URL? { stemPaths["drums"] }
-    var bassURL: URL? { stemPaths["bass"] }
-    var guitarURL: URL? { stemPaths["guitar"] }
-    var pianoURL: URL? { stemPaths["piano"] }
-    var otherURL: URL? { stemPaths["other"] }
+    public var vocalsURL: URL? { stemPaths["vocals"] }
+    public var drumsURL: URL? { stemPaths["drums"] }
+    public var bassURL: URL? { stemPaths["bass"] }
+    public var guitarURL: URL? { stemPaths["guitar"] }
+    public var pianoURL: URL? { stemPaths["piano"] }
+    public var otherURL: URL? { stemPaths["other"] }
     
     // MARK: - Computed Properties
-    var displayDuration: String {
+    public var displayDuration: String {
         let minutes = Int(duration) / 60
         let seconds = Int(duration) % 60
         return String(format: "%d:%02d", minutes, seconds)
     }
     
-    var projectDirectory: URL {
+    public var projectDirectory: URL {
         let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         return documentsPath.appendingPathComponent("Projects/\(id.uuidString)")
     }
     
-    var stemDirectory: URL {
+    public var stemDirectory: URL {
         projectDirectory.appendingPathComponent("stems")
     }
     
-    var analysisDirectory: URL {
+    public var analysisDirectory: URL {
         projectDirectory.appendingPathComponent("analysis")
     }
     
     // MARK: - Methods
-    mutating func setStemPath(_ stem: String, url: URL) {
+    public mutating func setStemPath(_ stem: String, url: URL) {
         stemPaths[stem] = url
     }
     
-    func getStemPath(_ stem: String) -> URL? {
+    public func getStemPath(_ stem: String) -> URL? {
         return stemPaths[stem]
     }
     
-    func allStemsAvailable() -> Bool {
+    public func allStemsAvailable() -> Bool {
         let requiredStems = ["vocals", "drums", "bass", "guitar", "piano", "others"]
         return requiredStems.allSatisfy { stemPaths[$0] != nil }
     }
